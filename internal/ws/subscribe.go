@@ -15,8 +15,12 @@ import (
 	"websocket_to_telegram/internal/models"
 )
 
+var Cancel context.CancelFunc
+
 func Subscribe(channel string, header string, update tgbotapi.Update) {
-	ctx := context.WithoutCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	Cancel = cancel
+	defer cancel()
 
 	var typeChannel string
 	switch channel {
@@ -135,6 +139,7 @@ func Unsubscribe(update tgbotapi.Update) {
 		conn.conn.Close(websocket.StatusNormalClosure, "leave")
 	}
 	RemoveConnById(int(update.Message.From.ID))
+	Cancel()
 }
 
 func SendMessage(update tgbotapi.Update, message string) {
