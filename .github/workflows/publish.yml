@@ -25,3 +25,4 @@ jobs:
           labels: |
             ARCH=arm64
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/websocket_to_telegram:latest
+          platforms: linux/amd64,linux/arm64
