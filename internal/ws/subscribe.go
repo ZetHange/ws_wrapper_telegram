@@ -15,12 +15,8 @@ import (
 	"websocket_to_telegram/internal/models"
 )
 
-var conn *websocket.Conn
-var ctxGlobal context.Context
-
 func Subscribe(channel string, header string, update tgbotapi.Update) {
 	ctx := context.WithoutCancel(context.Background())
-	ctxGlobal = ctx
 
 	var typeChannel string
 	switch channel {
@@ -41,7 +37,14 @@ func Subscribe(channel string, header string, update tgbotapi.Update) {
 
 	c, _, err := websocket.Dial(ctx, url, nil)
 	c.SetReadLimit(10737418240) // 10mb
-	conn = c
+
+	conn := Connect{
+		conn:      c,
+		ctxGlobal: &ctx,
+		tgId:      int(update.Message.From.ID),
+	}
+	Connections = append(Connections, conn)
+
 	if err != nil {
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Ошибка подключения по WebSocket: "+err.Error())
 		msg.ParseMode = "html"
@@ -116,13 +119,21 @@ func Subscribe(channel string, header string, update tgbotapi.Update) {
 
 }
 
-func Unsubscribe() {
-	conn.Close(websocket.StatusNormalClosure, "leave")
+func Unsubscribe(update tgbotapi.Update) {
+	conn := GetConnByTg(int(update.Message.From.ID))
+	if conn.tgId != 0 {
+		conn.conn.Close(websocket.StatusNormalClosure, "leave")
+	}
+	RemoveConnById(int(update.Message.From.ID))
 }
 
-func SendMessage(message string) {
-	err := conn.Write(ctxGlobal, websocket.MessageText, []byte(message))
-	if err != nil {
-		log.Println(err)
+func SendMessage(update tgbotapi.Update, message string) {
+	conn := GetConnByTg(int(update.Message.From.ID))
+	ctxGlobal := *conn.ctxGlobal
+	if conn.tgId != 0 {
+		err := conn.conn.Write(ctxGlobal, websocket.MessageText, []byte(message))
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }

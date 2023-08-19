@@ -12,6 +12,6 @@ func HandleLeave(update tgbotapi.Update) {
 	msg.ReplyToMessageID = update.Message.MessageID
 	msg.ParseMode = "html"
 	botInternal.SendMessage(msg)
-	ws.Unsubscribe()
+	ws.Unsubscribe(update)
 	storage.SetInChat(int(update.Message.From.ID), "")
 }

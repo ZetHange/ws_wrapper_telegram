@@ -29,18 +29,16 @@ func HandleJoin(update tgbotapi.Update, user storage.User) {
 		return
 	}
 
-	go func() {
-		chats := chat.GetChats(user.Header)
+	chats := chat.GetChats(user.Header)
 
-		if !utils.IncludeString(chats, text[1]) {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Тип чата указан неверно\nДоступные чаты можно посмотреть /chat")
-			msg.ReplyToMessageID = update.Message.MessageID
-			msg.ParseMode = "html"
-			botInternal.SendMessage(msg)
-			return
-		}
+	if !utils.IncludeString(chats, text[1]) {
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Тип чата указан неверно\nДоступные чаты можно посмотреть /chat")
+		msg.ReplyToMessageID = update.Message.MessageID
+		msg.ParseMode = "html"
+		botInternal.SendMessage(msg)
+		return
+	}
 
-		storage.SetInChat(user.TelegramId, text[1])
-		ws.Subscribe(text[1], user.Header, update)
-	}()
+	storage.SetInChat(user.TelegramId, text[1])
+	go ws.Subscribe(text[1], user.Header, update)
 }
