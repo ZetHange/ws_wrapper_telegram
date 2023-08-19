@@ -8,8 +8,7 @@ COPY . .
 ENV CGO_ENABLED=0
 RUN go build -ldflags="-s -w" -o telegram ./cmd/websocket_to_telegram/main.go
 
-FROM scratch
-ADD ca-certificates.crt /etc/ssl/certs/
+FROM aerokube/ca-certs:latest
 COPY --from=builder ["/build/telegram", "/"]
 
 ENTRYPOINT ["/telegram"]
