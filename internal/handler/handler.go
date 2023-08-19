@@ -6,6 +6,7 @@ import (
 	"strings"
 	botInternal "websocket_to_telegram/internal/bot"
 	"websocket_to_telegram/internal/handler/commands"
+	"websocket_to_telegram/internal/handler/commands/ban"
 	"websocket_to_telegram/internal/handler/commands/chat"
 	"websocket_to_telegram/internal/handler/commands/join"
 	"websocket_to_telegram/internal/handler/commands/leave"
@@ -46,6 +47,9 @@ func InitHandler() {
 					break
 				} else if strings.Contains(text, "/send") {
 					middleware.ChatMiddleware(update, send.HandleSend)
+					break
+				} else if strings.Contains(text, "/ban") {
+					middleware.AuthMiddleware(update, ban.HandleBan)
 					break
 				}
 				commands.HandleUndefined(update)

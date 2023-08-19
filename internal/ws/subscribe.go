@@ -54,7 +54,7 @@ func Subscribe(channel string, header string, update tgbotapi.Update) {
 	}
 	defer c.Close(websocket.StatusInternalError, "the sky is falling")
 
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Вы успешно подключены к чату, показаны первые 10 сообщений\n\n/send сообщение - отправка сообщения\n/leave - ливнуть")
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Вы успешно подключены к чату, показаны первые 5 сообщений\n\n/send сообщение - отправка сообщения\n/leave - ливнуть\n\nЧтобы отправить пользователя подумать о грустном нужно ответить на сообщение с ним и прописать команду:\n/ban - забанит на всегда\n/ban 60 причина сообщение - где 60 время в минутах, причина - одно слово, сообщение многа слов")
 	msg.ParseMode = "html"
 	botInternal.SendMessage(msg)
 
@@ -97,22 +97,32 @@ func Subscribe(channel string, header string, update tgbotapi.Update) {
 				return
 			}
 
-			if len(messageJSON.Updates) > 10 {
-				for _, text := range messageJSON.Updates[len(messageJSON.Updates)-10:] {
-					messageText := fmt.Sprintf("<b>%s</b>: %s\n%s", text.Author.Login, text.Author.Role, text.Content)
+			if len(messageJSON.Updates) > 5 {
+				for _, text := range messageJSON.Updates[len(messageJSON.Updates)-5:] {
+					messageText := fmt.Sprintf("<b><a href=\"%s\">%s</a></b>: %s [<code>%s</code>]\n%s", "https://admin.artux.net/users/"+text.Author.ID, text.Author.Login, text.Author.Role, text.Author.ID, text.Content)
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+					msg.DisableWebPagePreview = true
 					msg.ParseMode = "html"
 
 					botInternal.SendMessage(msg)
 				}
 			} else {
 				for _, text := range messageJSON.Updates {
-					messageText := fmt.Sprintf("<b>%s</b>: %s\n%s", text.Author.Login, text.Author.Role, text.Content)
+					messageText := fmt.Sprintf("<b><a href=\"%s\">%s</a></b>: %s [<code>%s</code>]\n%s", "https://admin.artux.net/users/"+text.Author.ID, text.Author.Login, text.Author.Role, text.Author.ID, text.Content)
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+					msg.DisableWebPagePreview = true
 					msg.ParseMode = "html"
 
 					botInternal.SendMessage(msg)
 				}
+			}
+			for _, text := range messageJSON.Events {
+				messageText := fmt.Sprintf("<b>%s</b>: %s\n%s", "SYSTEM", "ADMIN", text.Content)
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
+				msg.DisableWebPagePreview = true
+				msg.ParseMode = "html"
+
+				botInternal.SendMessage(msg)
 			}
 		}
 	}
