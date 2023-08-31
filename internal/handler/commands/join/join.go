@@ -1,6 +1,7 @@
 package join
 
 import (
+	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"strings"
 	botInternal "websocket_to_telegram/internal/bot"
@@ -39,6 +40,7 @@ func HandleJoin(update tgbotapi.Update, user storage.User) {
 		return
 	}
 
+	fmt.Println(user.Server)
 	storage.SetInChat(user.TelegramId, text[1])
-	go ws.Subscribe(text[1], user.Header, update)
+	go ws.Subscribe(text[1], user.Header, user.Server, update)
 }

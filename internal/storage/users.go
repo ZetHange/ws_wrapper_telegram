@@ -10,6 +10,7 @@ type User struct {
 	TelegramId int
 	ChatId     int
 	InChat     string
+	Server     string
 }
 
 var Users []User
@@ -40,4 +41,35 @@ func SetInChat(telegramId int, newInChatValue string) {
 			break
 		}
 	}
+}
+
+func SetServer(telegramId int, newServerValue string) {
+	for i, u := range Users {
+		if u.TelegramId == telegramId {
+			Users[i].Server = newServerValue
+			break
+		}
+	}
+}
+
+func GetServer(telegramId int) string {
+	for _, u := range Users {
+		if u.TelegramId == telegramId {
+			return u.Server
+			break
+		}
+	}
+	return ""
+}
+
+func Logout(telegramId int) {
+	var result []User
+
+	for _, p := range Users {
+		if p.TelegramId != telegramId {
+			result = append(result, p)
+		}
+	}
+
+	Users = result
 }

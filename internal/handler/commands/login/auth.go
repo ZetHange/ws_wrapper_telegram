@@ -8,10 +8,10 @@ import (
 	"websocket_to_telegram/internal/models"
 )
 
-func Auth(credentials string) models.User {
+func Auth(server string, credentials string) models.User {
 	client := &http.Client{}
 
-	req, err := http.NewRequest("GET", "https://dev.artux.net/pdanetwork/api/v1/user/info", nil)
+	req, err := http.NewRequest("GET", "https://"+server+".artux.net/pdanetwork/api/v1/user/info", nil)
 	if err != nil {
 		log.Println("Ошибка при создании GET-запроса:", err)
 		return models.User{}

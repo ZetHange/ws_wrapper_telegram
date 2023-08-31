@@ -12,8 +12,8 @@ import (
 func HandleLogin(update tgbotapi.Update) {
 	text := strings.Split(update.Message.Text, " ")
 
-	if len(text) < 2 {
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Не указаны логин и пароль\nПример: <code>/login login:12345678</code>")
+	if len(text) < 3 {
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Не указаны логин и пароль (или сервер)\nПример: <code>/login login:12345678 app</code>\n\nВместо app можно использовать dev")
 		msg.ReplyToMessageID = update.Message.MessageID
 		msg.ParseMode = "html"
 		botInternal.SendMessage(msg)
@@ -28,9 +28,17 @@ func HandleLogin(update tgbotapi.Update) {
 		return
 	}
 
+	if text[2] != "app" && text[2] != "dev" {
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Такого сервера не существует")
+		msg.ReplyToMessageID = update.Message.MessageID
+		msg.ParseMode = "html"
+		botInternal.SendMessage(msg)
+		return
+	}
+
 	go func() {
 		credentials := "Basic " + base64.StdEncoding.EncodeToString([]byte(text[1]))
-		user := Auth(credentials)
+		user := Auth(text[2], credentials)
 		if user.ID == "" {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Логин или пароль неверные")
 			msg.ReplyToMessageID = update.Message.MessageID
@@ -48,7 +56,7 @@ func HandleLogin(update tgbotapi.Update) {
 			return
 		}
 
-		message := fmt.Sprintf("Вы успешно вошли как <code>%s</code>\nВаша почта: <code>%s</code>", user.Login, user.Email)
+		message := fmt.Sprintf("Вы успешно вошли как <code>%s</code>\nВаша почта: <code>%s</code>\n\nВы находитесь в "+text[2], user.Login, user.Email)
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, message)
 		msg.ReplyToMessageID = update.Message.MessageID
 		msg.ParseMode = "html"
@@ -56,9 +64,10 @@ func HandleLogin(update tgbotapi.Update) {
 		storage.Users = append(storage.Users, storage.User{
 			User:       user,
 			TelegramId: int(update.Message.From.ID),
-			ChatId:     int(update.Message.MessageID),
+			ChatId:     update.Message.MessageID,
 			Header:     credentials,
 			InChat:     "",
+			Server:     text[2],
 		})
 
 		botInternal.SendMessage(msg)

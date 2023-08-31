@@ -17,7 +17,7 @@ import (
 
 var Cancel context.CancelFunc
 
-func Subscribe(channel string, header string, update tgbotapi.Update) {
+func Subscribe(channel string, header string, server string, update tgbotapi.Update) {
 	ctx, cancel := context.WithCancel(context.Background())
 	Cancel = cancel
 	defer cancel()
@@ -37,7 +37,8 @@ func Subscribe(channel string, header string, update tgbotapi.Update) {
 		log.Println(err.Error())
 	}
 
-	url := "wss://" + string(decodeString) + "@dev.artux.net/pdanetwork/" + typeChannel
+	url := "wss://" + string(decodeString) + "@" + server + ".artux.net/pdanetwork/" + typeChannel
+	fmt.Println(url)
 
 	c, _, err := websocket.Dial(ctx, url, nil)
 	c.SetReadLimit(10737418240) // 10mb
