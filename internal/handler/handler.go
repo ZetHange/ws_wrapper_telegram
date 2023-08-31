@@ -37,6 +37,8 @@ func InitHandler() {
 				middleware.AuthMiddleware(update, chat.HandleChat)
 			case "/leave":
 				middleware.ChatMiddleware(update, leave.HandleLeave)
+			case "/logout":
+				middleware.AuthMiddleware(update, commands.HandleLogout)
 			default:
 				text := update.Message.Text
 
