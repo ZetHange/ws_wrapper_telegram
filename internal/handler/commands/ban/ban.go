@@ -31,7 +31,7 @@ func HandleBan(update tgbotapi.Update, user storage.User) {
 
 	if len(text) == 1 {
 		go func() {
-			success := BanAlways(user.Header, uuid)
+			success := BanAlways(user.Header, user.Server, uuid)
 			if success {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("Пользователь [<code>%s</code>] успешно забанен НАВСЕГДА ХАХАХАА", uuid))
 				msg.ReplyToMessageID = update.Message.MessageID
@@ -57,7 +57,7 @@ func HandleBan(update tgbotapi.Update, user storage.User) {
 		message := strings.Join(text[3:], " ")
 
 		go func() {
-			success := BanTime(user.Header, uuid, secs*60, reason, message)
+			success := BanTime(user.Header, uuid, secs*60, reason, message, user.Server)
 			if success {
 				messageToUser := fmt.Sprintf("Пользователь [<code>%s</code>] забанен на %v минут\nПричина: %s\nСообщение: %s", uuid, secs, reason, message)
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageToUser)

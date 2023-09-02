@@ -8,10 +8,10 @@ import (
 	"net/http"
 )
 
-func BanAlways(header string, uuid string) bool {
+func BanAlways(header string, uuid string, server string) bool {
 	client := &http.Client{}
 
-	req, err := http.NewRequest("POST", "https://dev.artux.net/pdanetwork/api/v1/admin/bans/"+uuid+"/set/always", nil)
+	req, err := http.NewRequest("POST", "https://"+server+".artux.net/pdanetwork/api/v1/admin/bans/"+uuid+"/set/always", nil)
 	if err != nil {
 		log.Println("Ошибка при создании GET-запроса:", err)
 		return false
@@ -39,10 +39,10 @@ func BanAlways(header string, uuid string) bool {
 	}
 	return success
 }
-func BanTime(header string, uuid string, secs int, reason string, message string) bool {
+func BanTime(header string, uuid string, secs int, reason string, message string, server string) bool {
 	client := &http.Client{}
 
-	req, err := http.NewRequest("POST", "https://dev.artux.net/pdanetwork/api/v1/admin/bans/"+uuid+"?secs="+fmt.Sprintf("%v", secs)+"&reason="+reason+"&message="+message, nil)
+	req, err := http.NewRequest("POST", "https://"+server+".artux.net/pdanetwork/api/v1/admin/bans/"+uuid+"?secs="+fmt.Sprintf("%v", secs)+"&reason="+reason+"&message="+message, nil)
 	if err != nil {
 		log.Println("Ошибка при создании GET-запроса:", err)
 		return false

@@ -12,7 +12,6 @@ import (
 	"websocket_to_telegram/internal/handler/commands/leave"
 	"websocket_to_telegram/internal/handler/commands/login"
 	"websocket_to_telegram/internal/handler/commands/send"
-	"websocket_to_telegram/internal/handler/commands/set"
 	"websocket_to_telegram/internal/middleware"
 )
 
@@ -55,8 +54,8 @@ func InitHandler() {
 					middleware.AuthMiddleware(update, ban.HandleBan)
 					break
 				} else if strings.Contains(text, "/set") {
-					middleware.AuthMiddleware(update, set.HandleSet)
-					break
+					//middleware.AuthMiddleware(update, set.HandleSet)
+					//break
 				}
 				commands.HandleUndefined(update)
 			}
