@@ -113,7 +113,7 @@ func Subscribe(channel string, header string, server string, update tgbotapi.Upd
 				}
 			} else {
 				for _, text := range messageJSON.Updates {
-					messageText := fmt.Sprintf("<b><a href=\"%s\">%s</a></b>: %s [<code>%s</code>]\n%s", "https://admin.artux.net/users/"+text.Author.ID, text.Author.Login, text.Author.Role, text.Author.ID, text.Content)
+					messageText := fmt.Sprintf("<b><a href=\"%s\">%s</a></b>: %s [<code>%s</code>]\n%s", "https://admin.artux.net/panel/users/"+text.Author.ID, text.Author.Login, text.Author.Role, text.Author.ID, text.Content)
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
 					msg.DisableWebPagePreview = true
 					msg.ParseMode = "html"
