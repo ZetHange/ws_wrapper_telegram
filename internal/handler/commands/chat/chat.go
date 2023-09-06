@@ -8,7 +8,7 @@ import (
 	"websocket_to_telegram/internal/storage"
 )
 
-func HandleChat(update tgbotapi.Update, user storage.User) {
+func HandleChat(update tgbotapi.Update, user *storage.User) {
 	go func() {
 		message := fmt.Sprintf("Доступные чаты: %s, используйте /join для подключения к ним, при этом укажите ID\nПример: <code>/join GENERAL</code>", strings.Join(GetChats(user.Header), ", "))
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, message)

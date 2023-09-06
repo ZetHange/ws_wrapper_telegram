@@ -9,7 +9,7 @@ import (
 	"websocket_to_telegram/internal/storage"
 )
 
-func HandleBan(update tgbotapi.Update, user storage.User) {
+func HandleBan(update tgbotapi.Update, user *storage.User) {
 	if storage.GetInChat(int(update.Message.From.ID)) == "" {
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Вы не находитесь в чате")
 		msg.ReplyToMessageID = update.Message.MessageID

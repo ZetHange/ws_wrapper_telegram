@@ -7,7 +7,7 @@ import (
 	"websocket_to_telegram/internal/storage"
 )
 
-func HandleLogout(update tgbotapi.Update, user storage.User) {
+func HandleLogout(update tgbotapi.Update, user *storage.User) {
 	storage.Logout(user.TelegramId)
 
 	message := fmt.Sprintf("Вы успешно вышли")

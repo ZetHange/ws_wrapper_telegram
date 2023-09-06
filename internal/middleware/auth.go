@@ -6,7 +6,7 @@ import (
 	"websocket_to_telegram/internal/storage"
 )
 
-func AuthMiddleware(update tgbotapi.Update, next func(update tgbotapi.Update, user storage.User)) {
+func AuthMiddleware(update tgbotapi.Update, next func(update tgbotapi.Update, user *storage.User)) {
 	isAuth, user := storage.ContainsUser(int(update.Message.From.ID))
 	if !isAuth {
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Вы не авторизованы, используйте /login для авторизации")

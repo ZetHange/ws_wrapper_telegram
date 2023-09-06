@@ -11,7 +11,7 @@ import (
 	"websocket_to_telegram/pkg/utils"
 )
 
-func HandleJoin(update tgbotapi.Update, user storage.User) {
+func HandleJoin(update tgbotapi.Update, user *storage.User) {
 	text := strings.Split(update.Message.Text, " ")
 
 	if len(text) < 2 {
@@ -42,5 +42,5 @@ func HandleJoin(update tgbotapi.Update, user storage.User) {
 
 	fmt.Println(user.Server)
 	storage.SetInChat(user.TelegramId, text[1])
-	go ws.Subscribe(text[1], user.Header, user.Server, update)
+	go ws.Subscribe(text[1], user.Header, user.Server, update, false)
 }

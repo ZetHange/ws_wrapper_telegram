@@ -15,13 +15,13 @@ type User struct {
 
 var Users []User
 
-func ContainsUser(telegramId int) (bool, User) {
+func ContainsUser(telegramId int) (bool, *User) {
 	for _, user := range Users {
 		if user.TelegramId == telegramId {
-			return true, user
+			return true, &user
 		}
 	}
-	return false, User{}
+	return false, &User{}
 }
 
 func GetInChat(telegramId int) string {

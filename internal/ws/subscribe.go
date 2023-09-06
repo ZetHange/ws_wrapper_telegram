@@ -8,7 +8,6 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
 	"nhooyr.io/websocket"
-	"reflect"
 	"strings"
 	"time"
 	botInternal "websocket_to_telegram/internal/bot"
@@ -17,7 +16,7 @@ import (
 
 var Cancel context.CancelFunc
 
-func Subscribe(channel string, header string, server string, update tgbotapi.Update) {
+func Subscribe(channel string, header string, server string, update tgbotapi.Update, withoutMessage bool) {
 	ctx, cancel := context.WithCancel(context.Background())
 	Cancel = cancel
 	defer cancel()
@@ -38,7 +37,6 @@ func Subscribe(channel string, header string, server string, update tgbotapi.Upd
 	}
 
 	url := "wss://" + string(decodeString) + "@" + server + ".artux.net/pdanetwork/" + typeChannel
-	fmt.Println(url)
 
 	c, _, err := websocket.Dial(ctx, url, nil)
 	c.SetReadLimit(10737418240) // 10mb
@@ -55,13 +53,15 @@ func Subscribe(channel string, header string, server string, update tgbotapi.Upd
 		msg.ParseMode = "html"
 
 		botInternal.SendMessage(msg)
-		log.Println("Ошибка при подключении: %v", err)
+		log.Printf("Ошибка при подключении: %v\n", err)
 	}
 	defer c.Close(websocket.StatusInternalError, "the sky is falling")
 
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Вы успешно подключены к чату, показаны первые 5 сообщений\n\n/send сообщение - отправка сообщения\n/leave - ливнуть\n\nЧтобы отправить пользователя подумать о грустном нужно ответить на сообщение с ним и прописать команду:\n/ban - забанит на всегда\n/ban 60 причина сообщение - где 60 время в минутах, причина - одно слово, сообщение многа слов")
-	msg.ParseMode = "html"
-	botInternal.SendMessage(msg)
+	if !withoutMessage {
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Вы успешно подключены к чату, показаны первые 5 сообщений\n\n/send сообщение - отправка сообщения\n/leave - ливнуть\n\nЧтобы отправить пользователя подумать о грустном нужно ответить на сообщение с ним и прописать команду:\n/ban - забанит на всегда\n/ban 60 причина сообщение - где 60 время в минутах, причина - одно слово, сообщение многа слов")
+		msg.ParseMode = "html"
+		botInternal.SendMessage(msg)
+	}
 
 	ticker := time.NewTicker(time.Minute)
 
@@ -81,11 +81,12 @@ func Subscribe(channel string, header string, server string, update tgbotapi.Upd
 	for {
 		messageType, message, err := c.Read(ctx)
 		if err != nil {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Ошибка при чтении сообщения: "+err.Error())
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Ошибка при чтении сообщения: "+err.Error()+"\n\nПереподключение к серверу: <code>/join "+channel+"</code>")
 			msg.ParseMode = "html"
 
 			botInternal.SendMessage(msg)
-			log.Println(message, messageType, reflect.TypeOf(err))
+
+			Unsubscribe(update)
 
 			return
 		}
@@ -102,7 +103,7 @@ func Subscribe(channel string, header string, server string, update tgbotapi.Upd
 				return
 			}
 
-			if len(messageJSON.Updates) > 5 {
+			if len(messageJSON.Updates) > 5 && !withoutMessage {
 				for _, text := range messageJSON.Updates[len(messageJSON.Updates)-5:] {
 					messageText := fmt.Sprintf("<b><a href=\"%s\">%s</a></b>: %s [<code>%s</code>]\n%s", "https://admin.artux.net/panel/users/"+text.Author.ID, text.Author.Login, text.Author.Role, text.Author.ID, text.Content)
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
@@ -111,7 +112,7 @@ func Subscribe(channel string, header string, server string, update tgbotapi.Upd
 
 					botInternal.SendMessage(msg)
 				}
-			} else {
+			} else if !withoutMessage {
 				for _, text := range messageJSON.Updates {
 					messageText := fmt.Sprintf("<b><a href=\"%s\">%s</a></b>: %s [<code>%s</code>]\n%s", "https://admin.artux.net/panel/users/"+text.Author.ID, text.Author.Login, text.Author.Role, text.Author.ID, text.Content)
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, messageText)
